@@ -18,6 +18,7 @@ PRICES = [
 conn = sqlite3.connect('orders.db')
 cur = conn.cursor()
 API_TOKEN = '1888774189:AAEfUF-A8Lhp5GCetqkpZ7v5POrrA0j7ikE'
+BOT_URL = 'https://togir-bot.herokuapp.com'
 PAYMENT_TOKEN = '381764678:TEST:38798'
 admins = [915073363, 1058211493, 1800315908]
 bot = Bot(token=API_TOKEN)
