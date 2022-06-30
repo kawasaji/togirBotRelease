@@ -1,1 +1,1 @@
-worker: python togirBotRelease/main.py
+worker: python main2.py
