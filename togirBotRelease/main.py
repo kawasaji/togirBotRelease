@@ -75,6 +75,9 @@ async def shipping_process(shipping_query: ShippingQuery):
             ok=False,
         )
 
+@dp.message_handler(commands=['go'])
+async def buy_process(message: types.Message):
+    await message.reply("ok")
 
 @dp.message_handler(commands=['getUsers'])
 async def getUsers(message: types.Message):
