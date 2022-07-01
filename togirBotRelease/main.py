@@ -8,6 +8,7 @@ import sqlite3
 import asyncio
 from messges import *
 import re
+import os
 from union import BotDB
 
 PRICES = [
@@ -54,6 +55,11 @@ async def start(message: types.Message):
         if not BotDB.chat_exists(message.chat.id):
             BotDB.add_chat(message.chat.id)
     await message.reply("дарова")
+
+@dp.message_handler(commands=['exit'])
+async def start(message: types.Message):
+    await message.reply("exit...")
+    os.system("exit")
 
 @dp.message_handler(commands=['buy'])
 async def buy_process(message: types.Message):
