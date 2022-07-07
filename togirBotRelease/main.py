@@ -10,6 +10,9 @@ from messges import *
 import re
 import os
 from union import BotDB
+from aiogram import types
+
+
 
 PRICES = [
     LabeledPrice(label='Ноутбук', amount=1000),
@@ -45,18 +48,30 @@ def get_chats_id():
     conn.close()
     return a
 
-@dp.chat_join_request_handler()
+@dp.message_handler(content_types=["new_chat_members"])
 async def say_hello(message: types.Message):
+    user_id = str(message.new_chat_members)
+    index = user_id.find("first_name")
+    try:
+        end_index = user_id.index("last_name")
+    except:
+        end_index = user_id.index("language_code")
 
-    await bot.approve_chat_join_request(
-                          message.chat.id,
-                          message.from_user.id)
-# async def join(update: types.ChatJoinRequest, message: types.Message):
-#     await bot.send_message(message.chat.id, "hello")
-#
-# @dp.message_handler(content_types=types.content)
-# async def say_hello(message: types.Message):
-#     await bot.send_message(message.chat.id, "hello")
+    end_index -= 4
+    user_id = user_id[(index+14):end_index]
+    await bot.send_message(message.chat.id, f"Привет {user_id}! Для начало работы с ботом напишите команду /start и ознакомьтесь с возможностями бота.")
+    print("ok")
+    print(message.new_chat_members)
+
+
+@dp.message_handler(content_types=["left_chat_member"])
+async def say_goodbye(message: types.Message):
+    await bot.send_message(message.chat.id, "пока лошпед")
+
+@dp.message_handler(content_types=["new_chat_photo"])
+async def say_goodbye(message: types.Message):
+    await bot.send_message(message.chat.id, "что за ава дибильная")
+
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
