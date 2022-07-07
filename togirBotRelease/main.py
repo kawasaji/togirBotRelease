@@ -45,6 +45,18 @@ def get_chats_id():
     conn.close()
     return a
 
+@dp.chat_join_request_handler()
+async def say_hello(message: types.Message):
+
+    await bot.approve_chat_join_request(
+                          message.chat.id,
+                          message.from_user.id)
+# async def join(update: types.ChatJoinRequest, message: types.Message):
+#     await bot.send_message(message.chat.id, "hello")
+#
+# @dp.message_handler(content_types=types.content)
+# async def say_hello(message: types.Message):
+#     await bot.send_message(message.chat.id, "hello")
 
 @dp.message_handler(commands=['start'])
 async def start(message: types.Message):
