@@ -10,10 +10,17 @@ from messges import *
 import re
 import os
 
+from aiogram.utils.markdown import hlink
+
 from togirBotRelease.togirBotRelease.main import dp
 from union import BotDB
 from aiogram import types
 from main import *
+
+hostname = "google.com"
+channel = '@test'
+
+
 
 def get_users_id():
     conn = sqlite3.connect("chatId.db")
@@ -34,7 +41,7 @@ def get_chats_id():
     return a
 
 
-@dp.message_handler(commands=['start'])
+@dp.message_handler(commands=['start'], commands_prefix='!/.')
 async def start(message: types.Message):
     if message.chat.type == "private":
         if not BotDB.user_exists(message.from_user.id):
@@ -45,6 +52,22 @@ async def start(message: types.Message):
     await message.reply("дарова")
 
 
+@dp.message_handler(commands=['ping'], commands_prefix='!/.')
+async def start(message: types.Message):
+    response = os.system('ping ' + hostname)
+    if response == 0:
+        text = hostname + ' is up!'
+        await message.reply(text)
+    else:
+      print(hostname + ' is down!')
+      text = channel + ' ' + hostname + ' is down!'
+      await message.reply(text)
+
+@dp.message_handler(commands=['test'], commands_prefix='!/.')
+async def test(message: types.Message):
+    text = hlink('VK', 'https://vk.com')
+    await bot.send_message(chat_id=message.chat.id, text=text, parse_mode="HTML")
+    # await message.reply(text)
 
 @dp.message_handler(content_types=["new_chat_members"])
 async def say_hello(message: types.Message):
@@ -62,32 +85,32 @@ async def say_hello(message: types.Message):
     print(message.new_chat_members)
 
 
-@dp.message_handler(content_types=["left_chat_member"])
+@dp.message_handler(content_types=["left_chat_member"], commands_prefix='!/.')
 async def say_goodbye(message: types.Message):
     await bot.send_message(message.chat.id, "пока лошпед")
 
-@dp.message_handler(content_types=["new_chat_photo"])
+@dp.message_handler(content_types=["new_chat_photo"], commands_prefix='!/.')
 async def say_goodbye(message: types.Message):
     await bot.send_message(message.chat.id, "что за ава дибильная")
 
-@dp.message_handler(commands=['exit'])
+@dp.message_handler(commands=['exit'], commands_prefix='!/.')
 async def start(message: types.Message):
     await message.reply("exit...")
     os.system("exit")
 
 
-@dp.message_handler(commands=['go'])
+@dp.message_handler(commands=['go'], commands_prefix='!/.')
 async def buy_process(message: types.Message):
     await message.reply("ok")
 
-@dp.message_handler(commands=['getUsers'])
+@dp.message_handler(commands=['getUsers'], commands_prefix='!/.')
 async def getUsers(message: types.Message):
     if message.from_user.id in admins:
         users = get_users_id()
         await message.reply(f"Количество пользователей в базе данных: {len(users)}")
     else:
         await message.reply("Вы не админ бота.")
-@dp.message_handler(commands=['getChats'])
+@dp.message_handler(commands=['getChats'], commands_prefix='!/.')
 async def getUsers(message: types.Message):
     if message.from_user.id in admins:
         chats = get_chats_id()
@@ -95,7 +118,7 @@ async def getUsers(message: types.Message):
     else:
         await message.reply("Вы не админ бота.")
 
-@dp.message_handler(commands=['sendAllChats'])
+@dp.message_handler(commands=['sendAllChats'], commands_prefix='!/.')
 async def getUsers(message: types.Message):
     a = message.text.split()
     b = " ".join(a[1::])
@@ -118,7 +141,7 @@ async def getUsers(message: types.Message):
     else:
         await message.answer("Вы не админ")
 
-@dp.message_handler(commands=['sendAllUsers'])
+@dp.message_handler(commands=['sendAllUsers'], commands_prefix='!/.')
 async def getUsers(message: types.Message):
     a = message.text.split()
     b = " ".join(a[1::])
@@ -143,12 +166,12 @@ async def getUsers(message: types.Message):
         await message.answer("Вы не админ")
 
 
-@dp.message_handler(commands=['get'])
+@dp.message_handler(commands=['get'], commands_prefix='!/.')
 async def getChatId(message: types.Message):
     await message.reply(message.chat.id)
 
 
-@dp.message_handler(commands=['send'])
+@dp.message_handler(commands=['send', 'сенд'], commands_prefix='!/.')
 async def sendChatId(message: types.Message):
     if message.from_user.id in admins or message.from_user.user.id in admins:
         try:
@@ -182,7 +205,7 @@ async def record(message: types.Message):
         await message.reply(f'Ваш писюн уменьшился на {value}см!\nТеперь ваш писюн равен: см')
 
 
-@dp.message_handler(commands=['del'])
+@dp.message_handler(commands=['del', 'удалить', 'дел'], commands_prefix='!/.')
 async def delMessage(message: types.Message):
     text = message.text.split()
     print(text)
@@ -214,7 +237,7 @@ async def delMessage(message: types.Message):
         await message.reply("Вы не админ")
 
 
-@dp.message_handler(commands=['snus'])
+@dp.message_handler(commands=['snus'], commands_prefix='!/.')
 async def snus(message: types.Message):
     a = random.choice([0, 1])
     if a == 0:
@@ -223,7 +246,7 @@ async def snus(message: types.Message):
         await message.reply("Упс! Ваш снюс упал на пол!")
 
 
-@dp.message_handler(commands=['call'])
+@dp.message_handler(commands=['call'], commands_prefix='!/.')
 async def callBot(message: types.Message):
     a = random.choice([0, 1])
     if a == 0:
@@ -232,7 +255,7 @@ async def callBot(message: types.Message):
         await message.reply("досвидание")
 
 
-@dp.message_handler(commands=['stop'])
+@dp.message_handler(commands=['stop'], commands_prefix='!/.')
 async def notice(message: types.Message):
     if message.from_user.id in admins:
         a = message.text.split()
@@ -250,7 +273,7 @@ async def notice(message: types.Message):
         await message.reply("Вы не админ")
 
 
-@dp.message_handler(commands=['replyTo'])
+@dp.message_handler(commands=['replyTo'], commands_prefix='!/.')
 async def image(message: types.Message):
     if message.from_user.id in admins:
         try:
@@ -268,7 +291,7 @@ async def image(message: types.Message):
     # await bot.send_message(chat_id=message.chat.id, reply_to_message_id=a[1], text=b)
 
 
-@dp.message_handler(commands=['meme'])
+@dp.message_handler(commands=['meme'], commands_prefix='!/.')
 async def image(message: types.Message):
     if not BotDB.user_exists(message.from_user.id):
         BotDB.add_user(message.from_user.id)
@@ -287,7 +310,7 @@ async def image(message: types.Message):
             await message.reply("Длина сообщения превышает 100 символов!")
 
 
-@dp.message_handler(commands=['kill'])
+@dp.message_handler(commands=['kill'], commands_prefix='!/.')
 async def image(message: types.Message):
     a = [True, False]
     b = random.choice(a)
@@ -302,7 +325,7 @@ async def image(message: types.Message):
                                sticker=r"CAACAgIAAxkBAAEE4OVilQm9Qg27gXds8vs3kNMOnY4ujwAC-xkAAuOHWUvkPi9WizrQNyQE")
 
 
-@dp.message_handler(commands=['len'])
+@dp.message_handler(commands=['len'], commands_prefix='!/.')
 async def lenOut(message: types.Message):
     b = message.text.split()
 
@@ -311,14 +334,14 @@ async def lenOut(message: types.Message):
     await message.reply(c)
 
 
-@dp.message_handler(commands=['list'])
+@dp.message_handler(commands=['list'], commands_prefix='!/.')
 async def listOut(message: types.Message):
     a = "Ахмедлы группа - `-1001591824435`\nШкольная группа - `-1001216883171`\nШестой группа - `-1001497164843`"
     await bot.send_message(chat_id=message.chat.id, text=a, parse_mode="Markdown")
 
 
 
-@dp.message_handler(commands=['help'])
+@dp.message_handler(commands=['help'], commands_prefix='!/.')
 async def helpOut(message: types.Message):
     if not BotDB.user_exists(message.from_user.id):
         BotDB.add_user(message.from_user.id)
@@ -332,12 +355,12 @@ async def helpOut(message: types.Message):
                         "тянка - отправляет рандомную аниме тянку")
 
 
-@dp.message_handler(commands=['admin'])
+@dp.message_handler(commands=['admin'], commands_prefix='!/.')
 async def helpAdmin(message: types.Message):
     await bot.send_message(chat_id=message.chat.id, text=admin_text, parse_mode="HTML")
 
 
-@dp.message_handler(commands=['type'])
+@dp.message_handler(commands=['type'], commands_prefix='!/.')
 async def image(message: types.Message):
     if message.from_user.id in admins:
         message_id = message.reply_to_message.message_id
@@ -348,50 +371,26 @@ async def image(message: types.Message):
         await message.reply("Вы не админ")
 
 
-@dp.message_handler(commands=['getId'])
+@dp.message_handler(commands=['getId'], commands_prefix='!/.')
 async def getId(message: types.Message):
     # b = message.text.split()
     text = message.reply_to_message.from_user.id
     await bot.send_message(chat_id=message.chat.id, text=text)
 
 
-@dp.message_handler(commands=['getMessageId'])
+@dp.message_handler(commands=['getMessageId'], commands_prefix='!/.')
 async def getMessageId(message: types.Message):
     a = message.reply_to_message.message_id
     await message.reply(a)
 
 
-@dp.message_handler(commands=['admins'])
-async def getId(message: types.Message):
-    print(await bot.get_chat_administrators(chat_id=message.chat.id))
-    a = await bot.get_chat_administrators(chat_id=message.chat.id)
-
-    # y = json.loads(a)
-    a = str(a)
-    if "kawasaji" in a:
-        print("ok")
-    listA = list(a)
-    listA.pop(0)
-    listA.pop(-1)
-    a = "".join(listA)
-    a = str(a)
-    print(a)
-    a = a.replace("{", "[")
-    a = a.replace("}", "]")
-    b = set(await bot.get_chat_administrators(chat_id=message.chat.id))
-    print(a)
-    print(b)
-    await message.reply(await bot.get_chat_administrators(chat_id=message.chat.id))
-    print(b[0][0][0])
-
-
-@dp.message_handler(commands=['ok'])
+@dp.message_handler(commands=['ok'], commands_prefix='!/.')
 async def kickUser(message: types.Message):
     BotDB.set_status(message.from_user.id, 1)
     await message.reply("ok")
 
 
-@dp.message_handler(commands=['kick'])
+@dp.message_handler(commands=['kick'], commands_prefix='!/.')
 async def kickUser(message: types.Message):
     if message.chat.type == "private":
         if not BotDB.user_exists(message.from_user.id):
@@ -457,6 +456,16 @@ async def reply(message: types.Message):
     '''
     if "tiktok" in message.text.lower():
         await message.reply("тикток фигня")
+    if "выебать" == message.text.lower():
+        user1 = hlink(f'{message.from_user.first_name}', f'tg://openmessage?user_id={message.from_user.id}')
+        user2 = hlink(f'{message.reply_to_message.from_user.first_name}', f'tg://openmessage?user_id={message.reply_to_message.from_user.id}')
+        text = "👉👌 | "  + user1 + " жестко выебал " + user2
+        await bot.send_message(chat_id=message.chat.id, text=text, parse_mode="HTML")
+    if "лизнуть" == message.text.lower() or "отлизать" == message.text.lower():
+        user1 = hlink(f'{message.from_user.first_name}', f'tg://openmessage?user_id={message.from_user.id}')
+        user2 = hlink(f'{message.reply_to_message.from_user.first_name}', f'tg://openmessage?user_id={message.reply_to_message.from_user.id}')
+        text = "👅 | "  + user1 + " сделал приятное " + user2
+        await bot.send_message(chat_id=message.chat.id, text=text, parse_mode="HTML")
     if "тоже" in message.text or "так" in message.text:
         await message.reply("да")
     if "ахуел" in message.text.lower():
@@ -466,10 +475,10 @@ async def reply(message: types.Message):
     if "привет" in message.text.lower():
         await message.reply("пока")
     if "соси" in message.text.lower():
-        photo = open('files/test.jpg', 'rb')
+        # photo = open('files/test.jpg', 'rb')
         lol = message.from_user.first_name, "отсосал"
         await message.reply("сам соси, лошпед")
-        await bot.send_photo(chat_id=message.chat.id, photo=photo)
+        # await bot.send_photo(chat_id=message.chat.id, photo=photo)
         # await bot.send_message(chat_id=1058211493, text=lol)
     if "пизда" in message.text.lower():
         await message.reply("пошел нахуй")
