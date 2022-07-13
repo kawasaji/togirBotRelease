@@ -21,7 +21,6 @@ hostname = "google.com"
 channel = '@test'
 
 
-
 def get_users_id():
     conn = sqlite3.connect("chatId.db")
     cursor = conn.cursor()
@@ -30,6 +29,7 @@ def get_users_id():
     conn.commit()
     conn.close()
     return a
+
 
 def get_chats_id():
     conn = sqlite3.connect("chatId.db")
@@ -59,15 +59,17 @@ async def start(message: types.Message):
         text = hostname + ' is up!'
         await message.reply(text)
     else:
-      print(hostname + ' is down!')
-      text = channel + ' ' + hostname + ' is down!'
-      await message.reply(text)
+        print(hostname + ' is down!')
+        text = channel + ' ' + hostname + ' is down!'
+        await message.reply(text)
+
 
 @dp.message_handler(commands=['test'], commands_prefix='!/.')
 async def test(message: types.Message):
     text = hlink('VK', 'https://vk.com')
     await bot.send_message(chat_id=message.chat.id, text=text, parse_mode="HTML")
     # await message.reply(text)
+
 
 @dp.message_handler(content_types=["new_chat_members"])
 async def say_hello(message: types.Message):
@@ -77,21 +79,21 @@ async def say_hello(message: types.Message):
         end_index = user_id.index("last_name")
     except:
         end_index = user_id.index("language_code")
-
     end_index -= 4
-    user_id = user_id[(index+14):end_index]
-    await bot.send_message(message.chat.id, f"Привет {user_id}! Для начало работы с ботом напишите команду /start и ознакомьтесь с возможностями бота.")
-    print("ok")
-    print(message.new_chat_members)
+    user_id = user_id[(index + 14):end_index]
+    await bot.send_message(message.chat.id,
+                           f"Привет {user_id}! Для начало работы с ботом напишите команду /start и ознакомьтесь с возможностями бота.")
 
 
-@dp.message_handler(content_types=["left_chat_member"], commands_prefix='!/.')
+@dp.message_handler(content_types=["left_chat_member"])
 async def say_goodbye(message: types.Message):
     await bot.send_message(message.chat.id, "пока лошпед")
 
-@dp.message_handler(content_types=["new_chat_photo"], commands_prefix='!/.')
-async def say_goodbye(message: types.Message):
+
+@dp.message_handler(content_types=["new_chat_photo"])
+async def new_chat_photo(message: types.Message):
     await bot.send_message(message.chat.id, "что за ава дибильная")
+
 
 @dp.message_handler(commands=['exit'], commands_prefix='!/.')
 async def start(message: types.Message):
@@ -103,6 +105,7 @@ async def start(message: types.Message):
 async def buy_process(message: types.Message):
     await message.reply("ok")
 
+
 @dp.message_handler(commands=['getUsers'], commands_prefix='!/.')
 async def getUsers(message: types.Message):
     if message.from_user.id in admins:
@@ -110,6 +113,8 @@ async def getUsers(message: types.Message):
         await message.reply(f"Количество пользователей в базе данных: {len(users)}")
     else:
         await message.reply("Вы не админ бота.")
+
+
 @dp.message_handler(commands=['getChats'], commands_prefix='!/.')
 async def getUsers(message: types.Message):
     if message.from_user.id in admins:
@@ -117,6 +122,7 @@ async def getUsers(message: types.Message):
         await message.reply(f"Количество чатов в базе данных: {len(chats)}")
     else:
         await message.reply("Вы не админ бота.")
+
 
 @dp.message_handler(commands=['sendAllChats'], commands_prefix='!/.')
 async def getUsers(message: types.Message):
@@ -136,6 +142,29 @@ async def getUsers(message: types.Message):
                 BotDB.delete_user(chats[i][0])
             except aiogram.utils.exceptions.CantInitiateConversation:
                 BotDB.delete_user(chats[i][0])
+        await message.answer(f"Всё! Колличество отправленных сообщений: {count}")
+
+    else:
+        await message.answer("Вы не админ")
+
+@dp.message_handler(commands=['update'], commands_prefix='!/.')
+async def sendUpdate(message: types.Message):
+    users = get_users_id()
+    count = 0
+    if message.from_user.id in admins:
+        await message.answer("Начинаю...")
+        for i in range(len(users)):
+
+            try:
+                await bot.send_message(users[i][1], text=update)
+                count += 1
+            except aiogram.utils.exceptions.BotBlocked:
+                BotDB.delete_user(users[i][0])
+            except aiogram.utils.exceptions.BotKicked:
+                BotDB.delete_user(users[i][0])
+            except aiogram.utils.exceptions.CantInitiateConversation:
+                BotDB.delete_user(users[i][0])
+
         await message.answer(f"Всё! Колличество отправленных сообщений: {count}")
 
     else:
@@ -171,15 +200,19 @@ async def getChatId(message: types.Message):
     await message.reply(message.chat.id)
 
 
+
 @dp.message_handler(commands=['send', 'сенд'], commands_prefix='!/.')
 async def sendChatId(message: types.Message):
-    if message.from_user.id in admins or message.from_user.user.id in admins:
+    if message.from_user.id in admins:
         try:
             message_temp = message.text.split()
             a = " ".join(message_temp[2::])
             # await bot.send_message(chat_id=message_temp[1], text=a)
-            await bot.send_message(chat_id=message_temp[1], text=a, parse_mode="Markdown")
+            await bot.send_message(chat_id=message_temp[1], text=a, parse_mode="HTML")
             await message.reply("Сообщение отправлено.")
+        except aiogram.utils.exceptions.CantParseEntities as Error:
+            text = "Error " + str(Error)
+            await message.reply(text)
         except aiogram.utils.exceptions.BotBlocked:
             await message.reply("Пользователь заблокировал бота")
         except aiogram.utils.exceptions.CantInitiateConversation:
@@ -188,6 +221,7 @@ async def sendChatId(message: types.Message):
             await message.reply("Чат не найден.")
     else:
         await message.reply("Вы не админ.")
+
 
 @dp.message_handler(content_types=['text'], text='dick')
 async def record(message: types.Message):
@@ -340,7 +374,6 @@ async def listOut(message: types.Message):
     await bot.send_message(chat_id=message.chat.id, text=a, parse_mode="Markdown")
 
 
-
 @dp.message_handler(commands=['help'], commands_prefix='!/.')
 async def helpOut(message: types.Message):
     if not BotDB.user_exists(message.from_user.id):
@@ -447,24 +480,26 @@ async def reply(message: types.Message):
     if message.chat.type == "group" or message.chat.type == "supergroup":
         if not BotDB.chat_exists(message.chat.id):
             BotDB.add_chat(message.chat.id)
-    '''
-    if message.from_user.id == 1826023868 or message.from_user.id == 1657303362 or message.from_user.id == 5236126147:
+
+    if message.from_user.id == 2055051598:
         answers = ['тебя забыть спросили', 'че ты пиздишь в моем районе', 'заткнись', 'смешно', 'завали',
                    'помолчи да, надоел уже', 'бля, опять он начал...', 'мама неджяди', 'мама неджяди',
                    'إلهي امنحني القوة', 'إلهي امنحني القوة']
         await message.reply(random.choice(answers))
-    '''
+    
     if "tiktok" in message.text.lower():
         await message.reply("тикток фигня")
     if "выебать" == message.text.lower():
         user1 = hlink(f'{message.from_user.first_name}', f'tg://openmessage?user_id={message.from_user.id}')
-        user2 = hlink(f'{message.reply_to_message.from_user.first_name}', f'tg://openmessage?user_id={message.reply_to_message.from_user.id}')
-        text = "👉👌 | "  + user1 + " жестко выебал " + user2
+        user2 = hlink(f'{message.reply_to_message.from_user.first_name}',
+                      f'tg://openmessage?user_id={message.reply_to_message.from_user.id}')
+        text = "👉👌 | " + user1 + " жестко выебал " + user2
         await bot.send_message(chat_id=message.chat.id, text=text, parse_mode="HTML")
     if "лизнуть" == message.text.lower() or "отлизать" == message.text.lower():
         user1 = hlink(f'{message.from_user.first_name}', f'tg://openmessage?user_id={message.from_user.id}')
-        user2 = hlink(f'{message.reply_to_message.from_user.first_name}', f'tg://openmessage?user_id={message.reply_to_message.from_user.id}')
-        text = "👅 | "  + user1 + " сделал приятное " + user2
+        user2 = hlink(f'{message.reply_to_message.from_user.first_name}',
+                      f'tg://openmessage?user_id={message.reply_to_message.from_user.id}')
+        text = "👅 | " + user1 + " сделал приятное " + user2
         await bot.send_message(chat_id=message.chat.id, text=text, parse_mode="HTML")
     if "тоже" in message.text or "так" in message.text:
         await message.reply("да")
