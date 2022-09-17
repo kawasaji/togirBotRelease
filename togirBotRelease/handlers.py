@@ -505,8 +505,6 @@ async def reply(message: types.Message):
         await message.reply("да")
     if "ахуел" in message.text.lower():
         await message.reply("сам ахуел")
-    if "+" in message.text.lower():
-        await message.reply("+")
     if "привет" in message.text.lower():
         await message.reply("пока")
     if "соси" in message.text.lower():
