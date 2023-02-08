@@ -1,4 +1,6 @@
 # Togir Bot 1.0
+
+<img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/kawasaji/togirBotRelease?color=green&logo=backstage">
 <p>Собственный телеграм бот на <i>Python</i> использующий <i>Aiogram</i></p>
 <p>Бот имеет возможность отправлять и отвечать на сообщение в любом чате в котором находится через админ панель</p>
 <p>Бот имеет свою базу данных пользователей и групп, для рассылки</p>
